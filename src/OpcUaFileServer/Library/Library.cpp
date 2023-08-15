@@ -15,13 +15,16 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#include "OpcUaStackCore/Base/os.h"
-#include "OpcUaStackCore/Base/Log.h"
-#include "OpcUaFileServer/Library/Library.h"
-#include "OpcUaStackServer/ServiceSetApplication/ApplicationService.h"
-#include "OpcUaStackServer/ServiceSetApplication/NodeReferenceApplication.h"
 #include <iostream>
 #include "BuildConfig.h"
+
+#include "OpcUaStackCore/Base/os.h"
+#include "OpcUaStackCore/Base/Log.h"
+#include "OpcUaStackCore/BuildInTypes/OpcUaIdentifier.h"
+#include "OpcUaStackServer/ServiceSetApplication/ApplicationService.h"
+#include "OpcUaStackServer/ServiceSetApplication/NodeReferenceApplication.h"
+
+#include "OpcUaFileServer/Library/Library.h"
 
 using namespace OpcUaStackCore;
 using namespace OpcUaStackServer;
@@ -41,7 +44,27 @@ namespace OpcUaFileServer
 	bool
 	Library::startup(void)
 	{
+		bool rc = true;
+
 		Log(Debug, "Library::startup");
+
+		// Create root directory
+		rootDir_ = boost::make_shared<FileDirectoryObject>();
+		rc = rootDir_->init(&service(), "http://ASNeG.com/OpcUaFileServer");
+		if (rc == false) {
+			Log(Error, "init root directory error");
+			return false;
+		}
+		rc  = rootDir_->addToOpcUaModel(
+			"FileSystemRoot",
+			OpcUaNodeId((uint32_t)OpcUaId_ObjectsFolder),
+			OpcUaNodeId((uint32_t)OpcUaId_HasComponent)
+		);
+		if (rc == false) {
+			Log(Error, "init root directory error");
+			return false;
+		}
+
 		return true;
 	}
 
