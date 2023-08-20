@@ -20,7 +20,7 @@
 
 #include "OpcUaStackServer/Application/ApplicationIf.h"
 
-#include "../OpcUaLayer/FileDirectoryObject.h"
+#include "OpcUaFileServer/OpcUaLayer/FileDirectoryObject.h"
 
 namespace OpcUaFileServer
 {

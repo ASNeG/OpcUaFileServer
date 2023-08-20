@@ -18,8 +18,13 @@
 #ifndef __OpcUaFileServer_FileDirectoryObject_h__
 #define __OpcUaFileServer_FileDirectoryObject_h__
 
+#include <filesystem>
+
 #include "OpcUaStackServer/StandardObjectType/FileDirectoryType.h"
 #include "OpcUaStackServer/Application/ApplicationServiceIf.h"
+
+#include "OpcUaFileServer/DataLayer/FileSystemIf.h"
+#include "OpcUaFileServer/OpcUaLayer/FileObject.h"
 
 namespace OpcUaFileServer
 {
@@ -32,14 +37,17 @@ namespace OpcUaFileServer
 		using SPtr = boost::shared_ptr<FileDirectoryObject>;
 		using Map = std::map<OpcUaStackCore::OpcUaNodeId, SPtr>;
 
-		FileDirectoryObject(void);
+		FileDirectoryObject(const std::filesystem::path& path);
 		virtual ~FileDirectoryObject(void);
 
 		bool init(
+			FileSystemIf::SPtr fileSystemIf,
 			OpcUaStackServer::ApplicationServiceIf* applicationServiceIf,
 			const std::string& namespaceName
 		);
+		const std::filesystem::path path(void);
 
+		bool addFileSystemChildsToOpcUaModel(void);
 		bool addToOpcUaModel(
 			const std::string& displayName,
 			const OpcUaStackCore::OpcUaNodeId& parentNodeId,
@@ -53,10 +61,27 @@ namespace OpcUaFileServer
         virtual void call_MoveOrCopy_Method(OpcUaStackCore::ApplicationMethodContext* applicationMethodContext) override;
 
 	  private:
+        std::filesystem::path path_ = {};
+        FileSystemIf::SPtr fileSystemIf_ = nullptr;
 		OpcUaStackServer::ApplicationServiceIf* applicationServiceIf_ = nullptr;
 		std::string namespaceName_ = "";
 
 		FileDirectoryObject::Map fileDirectoryMap_;
+		FileObject::Map fileMap_;
+
+		FileDirectoryObject::SPtr createOpcUADirectoryObject(
+			const std::string& directoryName
+		);
+		bool deleteOpcUaDirectoryObject(
+			FileDirectoryObject::SPtr& fileDirectoryObject
+		);
+
+		FileObject::SPtr createOpcUaFileObject(
+			const std::string& fileName
+		);
+		bool deleteOpcUaFileObject(
+			FileObject::SPtr& fileObject
+		);
 	};
 
 }

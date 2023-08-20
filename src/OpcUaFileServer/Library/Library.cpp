@@ -25,6 +25,7 @@
 #include "OpcUaStackServer/ServiceSetApplication/NodeReferenceApplication.h"
 
 #include "OpcUaFileServer/Library/Library.h"
+#include "OpcUaFileServer/DataLayer/FileSystemAccess.h"
 
 using namespace OpcUaStackCore;
 using namespace OpcUaStackServer;
@@ -48,20 +49,43 @@ namespace OpcUaFileServer
 
 		Log(Debug, "Library::startup");
 
+		std::string fileSystemName = "FileSystemRoot";
+		std::string fileSystemDirectory = applicationInfo()->confDir();
+		Log(Debug, "create file system")
+			.parameter("FileSystemName", fileSystemName)
+			.parameter("FileSystemDirectory", fileSystemDirectory);
+
+		// Create file system access
+		auto fileSystemAccess = boost::make_shared<FileSystemAccess>();
+		fileSystemAccess->init((std::filesystem::path(fileSystemDirectory))); // FIXME: only example
+		FileSystemIf::SPtr fileSystemIf = fileSystemAccess;
+
+		Log(Debug, "");
+
 		// Create root directory
-		rootDir_ = boost::make_shared<FileDirectoryObject>();
-		rc = rootDir_->init(&service(), "http://ASNeG.com/OpcUaFileServer");
+		rootDir_ = boost::make_shared<FileDirectoryObject>(std::filesystem::path(""));
+		rc = rootDir_->init(
+			fileSystemIf,
+			&service(),
+			"http://ASNeG.com/OpcUaFileServer"
+		);
 		if (rc == false) {
 			Log(Error, "init root directory error");
 			return false;
 		}
 		rc  = rootDir_->addToOpcUaModel(
-			"FileSystemRoot",
+			fileSystemName,
 			OpcUaNodeId((uint32_t)OpcUaId_ObjectsFolder),
 			OpcUaNodeId((uint32_t)OpcUaId_HasComponent)
 		);
 		if (rc == false) {
 			Log(Error, "init root directory error");
+			return false;
+		}
+
+		// create file system objects in opc ua information model
+		if (!rootDir_->addFileSystemChildsToOpcUaModel()) {
+			Log(Error, "add file system objects to opc ua information model error");
 			return false;
 		}
 
