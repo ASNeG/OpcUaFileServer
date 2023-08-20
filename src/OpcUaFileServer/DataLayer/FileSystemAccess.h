@@ -82,6 +82,17 @@ namespace OpcUaFileServer
 			uint32_t& fileHandle
 		) override;
 
+		virtual bool writeFile(
+			uint32_t fileHandle,
+			const std::string& data
+		) override;
+
+		virtual bool readFile(
+			uint32_t fileHandle,
+			int32_t length,
+			std::string& data
+		) override;
+
 	  private:
 		uint32_t fileHandle_ = 1;
 		std::filesystem::path basePath_ = {};

@@ -256,7 +256,8 @@ namespace OpcUaFileServer
 		variant->variant(boost::make_shared<OpcUaNodeId>(fileObject->nodeId()));
 		applicationMethodContext->outputArguments_->push_back(variant);
 
-		boost::make_shared<OpcUaVariant>();
+		// Set file handle
+		variant = boost::make_shared<OpcUaVariant>();
 		variant->variant(fileHandle);
 		applicationMethodContext->outputArguments_->push_back(variant);
 
@@ -375,7 +376,7 @@ namespace OpcUaFileServer
 		deleteNodeInstance.node(fileDirectoryObject->nodeId());
 
 		if (!deleteNodeInstance.query(applicationServiceIf_)) {
-			Log(Error, "delete nodeinstance error")
+			Log(Error, "delete node instance error")
 				.parameter("DirectoryNodeId", fileDirectoryObject->nodeId());
 			return false;
 		}

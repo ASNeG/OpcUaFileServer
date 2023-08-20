@@ -63,6 +63,17 @@ namespace OpcUaFileServer
 			uint32_t& fileHandle
 		) = 0;
 
+		virtual bool writeFile(
+			uint32_t fileHandle,
+			const std::string& data
+		) = 0;
+
+		virtual bool readFile(
+			uint32_t fileHandle,
+			int32_t length,
+			std::string& data
+		) = 0;
+
 	  private:
 
 	};

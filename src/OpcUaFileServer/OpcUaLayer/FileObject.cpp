@@ -152,16 +152,109 @@ namespace OpcUaFileServer
     void
 	FileObject::call_GetPosition_Method(OpcUaStackCore::ApplicationMethodContext* applicationMethodContext)
     {
+
     }
 
     void
 	FileObject::call_Open_Method(OpcUaStackCore::ApplicationMethodContext* applicationMethodContext)
     {
+    	bool rc  = true;
+    	OpcUaVariant::SPtr variantInput;
+
+		// Check number of input parameters
+		if (applicationMethodContext->inputArguments_->size() != 1) {
+			Log(Error, "number of input arguments error in open file method");
+			applicationMethodContext->statusCode_ = BadInvalidArgument;
+			return;
+		}
+
+		// Get input parameter [0]: Mode
+		applicationMethodContext->inputArguments_->get(0,variantInput);
+		if (variantInput->variantType() != OpcUaBuildInType_OpcUaByte) {
+			Log(Error, "get input argument [0] error in open file method");
+			applicationMethodContext->statusCode_ = BadInvalidArgument;
+			return;
+		}
+		OpcUaByte mode = variantInput->get<OpcUaByte>();
+
+		// Open file
+		uint32_t fileHandle;
+		if (!open(fileHandle)) {
+			Log(Error, "open file failed")
+				.parameter("File", path_.string());
+			applicationMethodContext->statusCode_ =  BadInternalError;
+			return;
+		}
+
+		// add node id to result
+		applicationMethodContext->outputArguments_->resize(1);
+
+		// Set file handle
+		OpcUaVariant::SPtr variant = boost::make_shared<OpcUaVariant>();
+		variant->variant(fileHandle);
+		applicationMethodContext->outputArguments_->push_back(variant);
+
+		applicationMethodContext->statusCode_ = Success;
     }
 
     void
 	FileObject::call_Read_Method(OpcUaStackCore::ApplicationMethodContext* applicationMethodContext)
     {
+       	bool rc  = true;
+        OpcUaVariant::SPtr variantInput;
+
+    	// Check number of input parameters
+    	if (applicationMethodContext->inputArguments_->size() != 2) {
+    		Log(Error, "number of input arguments error in read file method");
+    		applicationMethodContext->statusCode_ = BadInvalidArgument;
+    		return;
+    	}
+
+    	// Get input parameter [0]: FileHandle
+    	applicationMethodContext->inputArguments_->get(0,variantInput);
+    	if (variantInput->variantType() != OpcUaBuildInType_OpcUaUInt32) {
+    		Log(Error, "get input argument [0] error in write file method");
+    		applicationMethodContext->statusCode_ = BadInvalidArgument;
+    		return;
+    	}
+    	uint32_t fileHandle = variantInput->get<uint32_t>();
+
+    	// Get input parameter [1]: Length
+    	applicationMethodContext->inputArguments_->get(1,variantInput);
+    	if (variantInput->variantType() != OpcUaBuildInType_OpcUaInt32) {
+    		Log(Error, "get input argument [1] error in read file method");
+    		applicationMethodContext->statusCode_ = BadInvalidArgument;
+    		return;
+    	}
+    	int32_t length = variantInput->get<OpcUaInt32>();
+
+		// Check if file handle exist
+		if (fileHandleSet_.find(fileHandle) == fileHandleSet_.end()) {
+			Log(Error, "read file failed, because file handle not exist")
+				.parameter("FileHandle", fileHandle);
+			applicationMethodContext->statusCode_ = BadNoEntryExists;
+			return;
+		}
+
+		// Read data to file
+		std::string str = "";
+		rc = fileSystemIf_->readFile(fileHandle, length, str);
+		if (!rc) {
+			Log(Error, "read file instance error")
+				.parameter("Path", path_.string());
+			applicationMethodContext->statusCode_ =  BadInternalError;
+			return;
+		}
+
+		// Set result
+		applicationMethodContext->outputArguments_->resize(1);
+
+		OpcUaVariant::SPtr variant = boost::make_shared<OpcUaVariant>();
+		variant->variant(boost::make_shared<OpcUaByteString>(str));
+		applicationMethodContext->outputArguments_->push_back(variant);
+
+		applicationMethodContext->statusCode_ = Success;
+    	return;
     }
 
     void
@@ -172,6 +265,54 @@ namespace OpcUaFileServer
     void
 	FileObject::call_Write_Method(OpcUaStackCore::ApplicationMethodContext* applicationMethodContext)
     {
+    	bool rc  = true;
+    	OpcUaVariant::SPtr variantInput;
+
+		// Check number of input parameters
+		if (applicationMethodContext->inputArguments_->size() != 2) {
+			Log(Error, "number of input arguments error in write file method");
+			applicationMethodContext->statusCode_ = BadInvalidArgument;
+			return;
+		}
+
+		// Get input parameter [0]: FileHandle
+		applicationMethodContext->inputArguments_->get(0,variantInput);
+		if (variantInput->variantType() != OpcUaBuildInType_OpcUaUInt32) {
+			Log(Error, "get input argument [0] error in write file method");
+			applicationMethodContext->statusCode_ = BadInvalidArgument;
+			return;
+		}
+		uint32_t fileHandle = variantInput->get<uint32_t>();
+
+		// Get input parameter [1]: Data
+		applicationMethodContext->inputArguments_->get(1,variantInput);
+		if (variantInput->variantType() != OpcUaBuildInType_OpcUaByteString) {
+			Log(Error, "get input argument [1] error in write file method");
+			applicationMethodContext->statusCode_ = BadInvalidArgument;
+			return;
+		}
+		OpcUaByteString::SPtr data = variantInput->getSPtr<OpcUaByteString>();
+
+		// Check if file handle exist
+		if (fileHandleSet_.find(fileHandle) == fileHandleSet_.end()) {
+			Log(Error, "write file failed, because file handle not exist")
+				.parameter("FileHandle", fileHandle);
+			applicationMethodContext->statusCode_ = BadNoEntryExists;
+			return;
+		}
+
+		// Write data to file
+		std::string str = std::string((char*)data->memBuf(), data->size());
+		rc = fileSystemIf_->writeFile(fileHandle, str);
+		if (!rc) {
+			Log(Error, "write file instance error")
+				.parameter("Path", path_.string());
+			applicationMethodContext->statusCode_ =  BadInternalError;
+			return;
+		}
+
+		applicationMethodContext->statusCode_ = Success;
+    	return;
     }
 
     bool

@@ -168,7 +168,7 @@ namespace OpcUaFileServer
 
 		// Create new file
 		std::fstream fs;
-		fs.open(newFile.string(), std::ios_base::out);
+		fs.open(newFile.string(), std::ios_base::out | std::ios_base::in /*| std::ios_base::app*/);
 		if (!fs.is_open()) {
 			Log(Error, "create file failed")
 				.parameter("NewFile", newFile);
@@ -252,7 +252,7 @@ namespace OpcUaFileServer
 
 		// Open file
 		auto fh = boost::make_shared<FileHandle>();
-		fh->fs_.open(newFile.string(), std::ios_base::out | std::ios_base::in);
+		fh->fs_.open(newFile.string(), std::ios_base::out | std::ios_base::in /*| std::ios_base::app*/);
 		if (!fh->fs_.is_open()) {
 			Log(Error, "open file failed")
 				.parameter("NewFile", newFile);
@@ -287,4 +287,59 @@ namespace OpcUaFileServer
 
 		return true;
 	}
+
+	bool
+	FileSystemAccess::writeFile(
+		uint32_t fileHandle,
+		const std::string& data
+	)
+	{
+		// Check file handle
+		auto it = fileHandleMap_.find(fileHandle);
+		if (it == fileHandleMap_.end()) {
+			Log(Error, "file handle not exist")
+				.parameter("FileHanlde", fileHandle);
+		}
+		auto fh = it->second;
+
+		// Check file
+		if (!fh->fs_.is_open()) {
+			Log(Error, "file write failed, because file not open")
+				.parameter("FileHandle", fileHandle);
+			return false;
+		}
+
+		// Write data to file
+		fh->fs_ << data;
+		return true;
+	}
+
+	bool
+	FileSystemAccess::readFile(
+		uint32_t fileHandle,
+		int32_t length,
+		std::string& data
+	)
+	{
+		std::stringstream ss;
+
+		// Check file handle
+		auto it = fileHandleMap_.find(fileHandle);
+		if (it == fileHandleMap_.end()) {
+			Log(Error, "file handle not exist")
+				.parameter("FileHanlde", fileHandle);
+		}
+		auto fh = it->second;
+
+		// Read data from file
+		char c;
+		while (!fh->fs_.eof()) {
+			fh->fs_.get(c);
+		    ss << c;
+		}
+		data = ss.str();
+
+		return true;
+	}
+
 }
