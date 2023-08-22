@@ -114,7 +114,8 @@ namespace OpcUaFileServer
 	{
 		// remove all file directory objects from opc ua information model
 		while (!fileDirectoryMap_.empty()) {
-			if (!deleteOpcUaDirectoryObject(fileDirectoryMap_.begin()->second)) {
+			auto fileDirectoryObject = fileDirectoryMap_.begin()->second;
+			if (!deleteOpcUaDirectoryObject(fileDirectoryObject)) {
 				Log(Error, "remove directory object error");
 				return false;
 			}
@@ -122,7 +123,8 @@ namespace OpcUaFileServer
 
 		// remove all file objects from opc ua information model
 		while (!fileMap_.empty()) {
-			if (!deleteOpcUaFileObject(fileMap_.begin()->second)) {
+			auto fileObject = fileMap_.begin()->second;
+			if (!deleteOpcUaFileObject(fileObject)) {
 				Log(Error, "remove file object error");
 				return false;
 			}
@@ -290,7 +292,8 @@ namespace OpcUaFileServer
 
 		// Check if node id is a directory object
 		if (itDirectory  != fileDirectoryMap_.end()) {
-			bool rc = deleteOpcUaDirectoryObject(itDirectory->second);
+			auto fileDirectoryObject = itDirectory->second;
+			bool rc = deleteOpcUaDirectoryObject(fileDirectoryObject);
 			if (!rc) {
 				Log(Error, "delete method error")
 					.parameter("NodeId", *objectToDelete.get());
@@ -301,7 +304,8 @@ namespace OpcUaFileServer
 
 		// Check if node id is a file object
 		else if (itFile != fileMap_.end()) {
-			bool rc = deleteOpcUaFileObject(itFile->second);
+			auto fileObject = itFile->second;
+			bool rc = deleteOpcUaFileObject(fileObject);
 			if (!rc) {
 				Log(Error, "delete method error")
 					.parameter("NodeId", *objectToDelete.get());

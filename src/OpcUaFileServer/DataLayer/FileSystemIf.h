@@ -74,6 +74,16 @@ namespace OpcUaFileServer
 			std::string& data
 		) = 0;
 
+		virtual bool isReadable(
+			const std::string& path,
+			const std::string& file
+		) = 0;
+
+		virtual bool isWriteable(
+			const std::string& path,
+			const std::string& file
+		) = 0;
+
 	  private:
 
 	};

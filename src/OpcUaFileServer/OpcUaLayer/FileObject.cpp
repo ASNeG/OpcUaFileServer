@@ -35,10 +35,10 @@ namespace OpcUaFileServer
 
 	FileObject::~FileObject(void)
 	{
-		for (auto fileHandle: fileHandleSet_) {
+		FileHandleSet tmpFileHandleSet = fileHandleSet_;
+		for (auto fileHandle: tmpFileHandleSet) {
 			close(fileHandle);
 		}
-		fileHandleSet_.clear();
 	}
 
 	bool
@@ -89,10 +89,10 @@ namespace OpcUaFileServer
 	FileObject::deleteFromOpcUaModel(void)
 	{
 		// close all files
-		for (auto fileHandle: fileHandleSet_) {
+		FileHandleSet tmpFileHandleSet = fileHandleSet_;
+		for (auto fileHandle: tmpFileHandleSet) {
 			close(fileHandle);
 		}
-		fileHandleSet_.clear();
 
 		// remove object from opc ua model
 		DeleteNodeInstance deleteNodeInstance;

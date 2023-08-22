@@ -40,15 +40,36 @@ namespace OpcUaFileServer
 	bool
 	FileSystemAccess::init(const std::filesystem::path& basePath)
 	{
+		bool rc = true;
 		basePath_ = basePath;
 
 		// check if base path exist
-		if (!std::filesystem::exists(basePath)) {
+		try {
+			rc  = std::filesystem::exists(basePath);
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem exists call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "base file system path do not exist")
 				.parameter("BasePath", basePath);
 			return false;
 		}
-		if (!std::filesystem::is_directory(basePath)) {
+
+		// Check if base path is a directory
+		try {
+			rc = std::filesystem::is_directory(basePath);
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem is_directory call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "base file system path do not exist")
 				.parameter("BasePath", basePath);
 			return false;
@@ -64,21 +85,43 @@ namespace OpcUaFileServer
 		std::vector<std::string>& directories
 	)
 	{
+		bool rc = true;
 		std::filesystem::path absPath = basePath_;
 		absPath.append(path);
 
-		// Check path
-		if (!std::filesystem::exists(std::filesystem::path(absPath))) {
+		// Check if path exist
+		try {
+			rc = std::filesystem::exists(std::filesystem::path(absPath));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem exists call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "get childs error, because base path not exist")
 				.parameter("Path", absPath);
 			return;
 		}
-		if (!std::filesystem::is_directory(std::filesystem::path(absPath))) {
+
+		// Check if path is a directory
+		try {
+			rc  = std::filesystem::is_directory(std::filesystem::path(absPath));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem is_directory call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "get childs error, because base path is not a directory")
 				.parameter("Path", absPath);
 			return;
 		}
 
+		// Get all directory childs and file childs from directory
 		for (const auto & entry : std::filesystem::directory_iterator(absPath)) {
 			if (std::filesystem::is_directory(entry.path())) {
 				directories.push_back(entry.path().filename().string());
@@ -95,18 +138,40 @@ namespace OpcUaFileServer
 		const std::string& directory
 	)
 	{
+		bool rc = true;
+
 		// Create access path
 		std::filesystem::path absPath(basePath_);
 		absPath.append(path);
 
-		// Check path
-		if (!std::filesystem::exists(std::filesystem::path(absPath))) {
+		// Check if path exist
+		try {
+			rc = std::filesystem::exists(std::filesystem::path(absPath));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem exists call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "cannot create directory, because base path not exist")
 				.parameter("Path", absPath)
 				.parameter("Directory", directory);
 			return false;
 		}
-		if (!std::filesystem::is_directory(std::filesystem::path(absPath))) {
+
+		// check if path is a directory
+		try {
+			rc = std::filesystem::is_directory(std::filesystem::path(absPath));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem is_directory call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "cannot create directory, because base path is not a directory")
 				.parameter("Path", absPath)
 				.parameter("Directory", directory);
@@ -116,14 +181,33 @@ namespace OpcUaFileServer
 		std::filesystem::path newDirectory(absPath);
 		newDirectory.append(directory);
 
-		if (std::filesystem::exists(std::filesystem::path(newDirectory))) {
+		// Check if new directory already exist
+		try {
+			rc  = std::filesystem::exists(std::filesystem::path(newDirectory));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem exists call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (rc) {
 			Log(Error, "cannot create directory, because target directory already exist")
 				.parameter("NewDirectory", newDirectory);
 			return false;
 		}
 
 		// Create new directory
-		if (!std::filesystem::create_directory(newDirectory)) {
+		try {
+			rc  = std::filesystem::create_directory(newDirectory);
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem create_directory call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "cannot create directory")
 				.parameter("Path", absPath)
 				.parameter("Directory", directory);
@@ -139,18 +223,40 @@ namespace OpcUaFileServer
 		const std::string& file
 	)
 	{
+		bool rc = true;
+
 		// Create access path
 		std::filesystem::path absPath(basePath_);
 		absPath.append(path);
 
-		// Check path
-		if (!std::filesystem::exists(std::filesystem::path(absPath))) {
+		// Check if path exist
+		try {
+			rc = std::filesystem::exists(std::filesystem::path(absPath));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem exists call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "cannot create file, because base path not exist")
 				.parameter("Path", absPath)
 				.parameter("File", file);
 			return false;
 		}
-		if (!std::filesystem::is_directory(std::filesystem::path(absPath))) {
+
+		// Check if path is a directory
+		try {
+			rc = std::filesystem::is_directory(std::filesystem::path(absPath));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem is_directory call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "cannot create file, because base path is not a directory")
 				.parameter("Path", absPath)
 				.parameter("File", file);
@@ -160,23 +266,40 @@ namespace OpcUaFileServer
 		std::filesystem::path newFile(absPath);
 		newFile.append(file);
 
-		if (std::filesystem::exists(std::filesystem::path(newFile))) {
+		// Check if new file already exist
+		try {
+			rc = std::filesystem::exists(std::filesystem::path(newFile));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem exists call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (rc) {
 			Log(Error, "cannot create file, because target file already exist")
 				.parameter("NewFile", newFile);
 			return false;
 		}
+		rc = true;
 
 		// Create new file
 		std::fstream fs;
-		fs.open(newFile.string(), std::ios_base::out | std::ios_base::in /*| std::ios_base::app*/);
-		if (!fs.is_open()) {
-			Log(Error, "create file failed")
-				.parameter("NewFile", newFile);
-			return false;
+		try {
+			fs.open(newFile.string(), std::ios_base::out | std::ios_base::in | std::ios_base::app);
+			if (!fs.is_open()) {
+				Log(Error, "create file failed")
+					.parameter("NewFile", newFile);
+				return false;
+			}
+			fs.close();
+		} catch (const std::exception& e) {
+			Log(Error, "fstream operation error")
+				.parameter("What", e.what());
+			rc  = false;
 		}
-		fs.close();
 
-		return true;
+		return rc;
 	}
 
 	bool
@@ -184,25 +307,56 @@ namespace OpcUaFileServer
 		const std::string& path
 	)
 	{
+		bool rc = true;
+
 		// Create access path
 		std::filesystem::path absPath(basePath_);
 		absPath.append(path);
 
-		// Check path
-		if (!std::filesystem::exists(std::filesystem::path(absPath))) {
+		// Check ic path exist
+		try {
+			rc = std::filesystem::exists(std::filesystem::path(absPath));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem exists call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "cannot delete directory/file, because path not exist")
 				.parameter("Path", absPath);
 			return false;
 		}
-		if (!std::filesystem::is_directory(std::filesystem::path(absPath)) &&
-			!std::filesystem::is_regular_file(std::filesystem::path(absPath))) {
+
+		// Check if path is a directory or a regular file
+		try {
+			rc  = !std::filesystem::is_directory(std::filesystem::path(absPath)) &&
+				  !std::filesystem::is_regular_file(std::filesystem::path(absPath));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem is_directory or is_regular_file call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (rc) {
 			Log(Error, "cannot delete directory/file, because path is not a directory or regular file")
 				.parameter("Path", absPath);
 			return false;
 		}
 
 		// Delete directory/file
-		if (!std::filesystem::remove_all(absPath)) {
+		try {
+			rc = std::filesystem::remove_all(absPath);
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem remove_all call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "cannot remove directory/file")
 				.parameter("Path", absPath);
 			return false;
@@ -218,18 +372,40 @@ namespace OpcUaFileServer
 		uint32_t& fileHandle
 	)
 	{
+		bool rc = true;
+
 		// Create access path
 		std::filesystem::path absPath(basePath_);
 		absPath.append(path);
 
-		// Check path
-		if (!std::filesystem::exists(std::filesystem::path(absPath))) {
+		// Check if path exist
+		try {
+			rc = std::filesystem::exists(std::filesystem::path(absPath));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem exists call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "cannot open file, because base path not exist")
 				.parameter("Path", absPath)
 				.parameter("File", file);
 			return false;
 		}
-		if (!std::filesystem::is_directory(std::filesystem::path(absPath))) {
+
+		// Check if path is a directory
+		try {
+			rc  = std::filesystem::is_directory(std::filesystem::path(absPath));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem is_directory call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "cannot open file, because base path is not a directory")
 				.parameter("Path", absPath)
 				.parameter("File", file);
@@ -239,12 +415,33 @@ namespace OpcUaFileServer
 		std::filesystem::path newFile(absPath);
 		newFile.append(file);
 
-		if (!std::filesystem::exists(std::filesystem::path(newFile))) {
+		// Check if file exist
+		try {
+			rc = std::filesystem::exists(std::filesystem::path(newFile));
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem exists call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "cannot open file, because target file not exist")
 				.parameter("NewFile", newFile);
 			return false;
 		}
-		if (!std::filesystem::is_regular_file(newFile)) {
+
+		// Check if file is a regular file
+		try {
+			rc  = std::filesystem::is_regular_file(newFile);
+		} catch(std::filesystem::filesystem_error const& ex) {
+			Log(Error, "filesystem is_regular call error")
+				.parameter("What", ex.what())
+				.parameter("CodeValue", ex.code().value())
+				.parameter("CodeMessage", ex.code().message());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "cannot open file, because target file is not a regular file")
 				.parameter("NewFile", newFile);
 			return false;
@@ -252,8 +449,19 @@ namespace OpcUaFileServer
 
 		// Open file
 		auto fh = boost::make_shared<FileHandle>();
-		fh->fs_.open(newFile.string(), std::ios_base::out | std::ios_base::in /*| std::ios_base::app*/);
-		if (!fh->fs_.is_open()) {
+		try {
+			fh->fs_.open(newFile.string(), std::ios_base::out | std::ios_base::in /*| std::ios_base::app*/);
+			if (!fh->fs_.is_open()) {
+				Log(Error, "open file failed")
+					.parameter("NewFile", newFile);
+				return false;
+			}
+		} catch (const std::exception& e) {
+			Log(Error, "fstream operation error")
+				.parameter("What", e.what());
+			rc = false;
+		}
+		if (!rc) {
 			Log(Error, "open file failed")
 				.parameter("NewFile", newFile);
 			return false;
@@ -280,7 +488,13 @@ namespace OpcUaFileServer
 		}
 
 		// Close file
-		it->second->fs_.close();
+		try {
+			it->second->fs_.close();
+		} catch (const std::exception& e) {
+			Log(Error, "fstream operation error")
+				.parameter("What", e.what());
+			return false;
+		}
 
 		// Remove file handle from file handle map
 		fileHandleMap_.erase(fileHandle);
@@ -310,7 +524,15 @@ namespace OpcUaFileServer
 		}
 
 		// Write data to file
-		fh->fs_ << data;
+		try {
+			fh->fs_ << data;
+		} catch (const std::exception& e) {
+			Log(Error, "fstream write data error")
+				.parameter("What", e.what())
+				.parameter("FileHandle", fileHandle);
+			return false;
+		}
+
 		return true;
 	}
 
@@ -332,13 +554,40 @@ namespace OpcUaFileServer
 		auto fh = it->second;
 
 		// Read data from file
-		char c;
-		while (!fh->fs_.eof()) {
-			fh->fs_.get(c);
-		    ss << c;
+		try {
+			char c;
+			while (!fh->fs_.eof()) {
+				fh->fs_.get(c);
+				ss << c;
+			}
+			data = ss.str();
+		} catch (const std::exception& e) {
+			Log(Error, "fstream read data error")
+				.parameter("What", e.what())
+				.parameter("FileHandle", fileHandle);
+			return false;
 		}
-		data = ss.str();
 
+		return true;
+	}
+
+	bool
+	FileSystemAccess::isReadable(
+		const std::string& path,
+		const std::string& file
+	)
+	{
+		// FIXME: TODO
+		return true;
+	}
+
+	bool
+	FileSystemAccess::isWriteable(
+		const std::string& path,
+		const std::string& file
+	)
+	{
+		// FIXME: TODO
 		return true;
 	}
 
