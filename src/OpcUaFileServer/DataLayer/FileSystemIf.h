@@ -19,16 +19,26 @@
 #define __OpcUaFileServer_FileSystemIf_h__
 
 #include <vector>
+#include <bitset>
 
 #include <boost/shared_ptr.hpp>
 
 namespace OpcUaFileServer
 {
 
+	typedef enum
+	{
+		FileModeRead = 1,
+		FileModeWrite = 2,
+		FileModeEraseExisting = 4,
+		FileModeAppend = 8
+	} FileMode;
+
 	class FileSystemIf
 	{
 	  public:
 		using SPtr = boost::shared_ptr<FileSystemIf>;
+		using FileMode = std::bitset<4>;
 
 		FileSystemIf(void);
 		virtual ~FileSystemIf(void);
@@ -56,6 +66,7 @@ namespace OpcUaFileServer
 		virtual bool openFile(
 			const std::string& path,
 			const std::string& file,
+			FileMode fileMode,
 			uint32_t& fileHandle
 		) = 0;
 

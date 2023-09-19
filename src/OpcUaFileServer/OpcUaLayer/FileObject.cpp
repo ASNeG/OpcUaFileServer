@@ -177,9 +177,16 @@ namespace OpcUaFileServer
 		}
 		OpcUaByte mode = variantInput->get<OpcUaByte>();
 
+		if (mode > 0x0F) {
+			Log(Error, "get input argument [0] error in open file method, because mode invalid");
+				applicationMethodContext->statusCode_ = BadInvalidArgument;
+				return;
+		}
+		FileSystemIf::FileMode fileMode = mode;
+
 		// Open file
 		uint32_t fileHandle;
-		if (!open(fileHandle)) {
+		if (!open(fileHandle, mode)) {
 			Log(Error, "open file failed")
 				.parameter("File", path_.string());
 			applicationMethodContext->statusCode_ =  BadInternalError;
@@ -329,12 +336,12 @@ namespace OpcUaFileServer
     }
 
     bool
-	FileObject::open(uint32_t& handle)
+	FileObject::open(uint32_t& handle,  FileSystemIf::FileMode fileMode)
     {
     	uint32_t fileHandle;
 
     	// open file instance
-    	bool rc  = fileSystemIf_->openFile(path_.parent_path().string(), path_.filename().string(), fileHandle);
+    	bool rc  = fileSystemIf_->openFile(path_.parent_path().string(), path_.filename().string(), fileMode, fileHandle);
 		if (!rc) {
 			Log(Error, "open file instance error")
 				.parameter("Path", path_.string());

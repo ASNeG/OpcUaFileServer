@@ -55,7 +55,7 @@ namespace OpcUaFileServer
 		bool deleteFromOpcUaModel(void);
 
 	    bool create(void);
-	    bool open(uint32_t& handle);
+	    bool open(uint32_t& handle, FileSystemIf::FileMode fileMode);
 	    bool close(uint32_t handle);
 
 	  private:

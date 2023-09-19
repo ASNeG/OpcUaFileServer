@@ -286,6 +286,9 @@ namespace OpcUaFileServer
 		// Create new file
 		std::fstream fs;
 		try {
+
+			// FIXME: We must configure file modes in configuration file!!
+
 			fs.open(newFile.string(), std::ios_base::out | std::ios_base::in | std::ios_base::app);
 			if (!fs.is_open()) {
 				Log(Error, "create file failed")
@@ -369,6 +372,7 @@ namespace OpcUaFileServer
 	FileSystemAccess::openFile(
 		const std::string& path,
 		const std::string& file,
+		FileMode fileMode,
 		uint32_t& fileHandle
 	)
 	{
@@ -450,6 +454,9 @@ namespace OpcUaFileServer
 		// Open file
 		auto fh = boost::make_shared<FileHandle>();
 		try {
+
+			// FIXME: use file modes!!!!
+
 			fh->fs_.open(newFile.string(), std::ios_base::out | std::ios_base::in /*| std::ios_base::app*/);
 			if (!fh->fs_.is_open()) {
 				Log(Error, "open file failed")

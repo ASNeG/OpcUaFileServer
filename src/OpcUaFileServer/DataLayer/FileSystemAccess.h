@@ -75,6 +75,7 @@ namespace OpcUaFileServer
 		virtual bool openFile(
 			const std::string& path,
 			const std::string& file,
+			FileMode fileMode,
 			uint32_t& fileHandle
 		) override;
 
