@@ -74,4 +74,37 @@ namespace OpcUaFileServer
 		return false;
 	}
 
+	void
+	FileMode::out(std::ostream& os) const
+	{
+		bool found = false;
+
+		if (mode_[0] == 1) {
+			if (found) os << ",";
+			os << "Read";
+			found = true;
+		}
+
+		if (mode_[1] == 1) {
+			if (found) os << ",";
+			os << "Write";
+			found = true;
+		}
+
+		if (mode_[2] == 1) {
+			if (found) os << ",";
+			os << "EraseExisting";
+			found = true;
+		}
+
+		if (mode_[3] == 1) {
+			if (found) os << ",";
+			os << "Append";
+			found = true;
+		}
+		if (!found) {
+			os << "None";
+		}
+	}
+
 }

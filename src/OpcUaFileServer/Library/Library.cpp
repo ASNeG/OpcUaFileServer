@@ -1,5 +1,5 @@
 /*
-   Copyright 2015-2020 Kai Huebl (kai@huebl-sgh.de)
+   Copyright 2023 Kai Huebl (kai@huebl-sgh.de)
 
    Lizenziert gemäß Apache Licence Version 2.0 (die „Lizenz“); Nutzung dieser
    Datei nur in Übereinstimmung mit der Lizenz erlaubt.
@@ -45,58 +45,13 @@ namespace OpcUaFileServer
 	bool
 	Library::startup(void)
 	{
-		bool rc = true;
-
-		Log(Debug, "Library::startup");
-
-		std::string fileSystemName = "FileSystemRoot";
-		std::string fileSystemDirectory = applicationInfo()->confDir();
-		Log(Debug, "create file system")
-			.parameter("FileSystemName", fileSystemName)
-			.parameter("FileSystemDirectory", fileSystemDirectory);
-
-		// Create file system access
-		auto fileSystemAccess = boost::make_shared<FileSystemAccess>();
-		fileSystemAccess->init((std::filesystem::path(fileSystemDirectory))); // FIXME: only example
-		FileSystemIf::SPtr fileSystemIf = fileSystemAccess;
-
-		Log(Debug, "");
-
-		// Create root directory
-		rootDir_ = boost::make_shared<FileDirectoryObject>(std::filesystem::path(""));
-		rc = rootDir_->init(
-			fileSystemIf,
-			&service(),
-			"http://ASNeG.com/OpcUaFileServer"
-		);
-		if (rc == false) {
-			Log(Error, "init root directory error");
-			return false;
-		}
-		rc  = rootDir_->addToOpcUaModel(
-			fileSystemName,
-			OpcUaNodeId((uint32_t)OpcUaId_ObjectsFolder),
-			OpcUaNodeId((uint32_t)OpcUaId_HasComponent)
-		);
-		if (rc == false) {
-			Log(Error, "init root directory error");
-			return false;
-		}
-
-		// create file system objects in opc ua information model
-		if (!rootDir_->addFileSystemChildsToOpcUaModel()) {
-			Log(Error, "add file system objects to opc ua information model error");
-			return false;
-		}
-
-		return true;
+		return application_.startup(applicationInfo()->configFileName(), this);
 	}
 
 	bool
 	Library::shutdown(void)
 	{
-		Log(Debug, "Library::shutdown");
-		return true;
+		return application_.shutdown();
 	}
 
 	std::string

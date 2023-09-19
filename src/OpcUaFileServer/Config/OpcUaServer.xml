@@ -144,7 +144,7 @@
     <Application>
       <Name>OpcUaFileServer</Name>  
       <Library>OpcUaFileServer</Library>
-      <Config></Config>
+      <Config>@CONF_DIR@/OpcUaFileServer.xml</Config>
       
       <ApplThreadPool>
         <Name>ThrAppl</Name>

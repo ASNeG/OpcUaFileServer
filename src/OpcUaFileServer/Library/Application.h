@@ -15,33 +15,37 @@
    Autor: Kai Huebl (kai@huebl-sgh.de)
  */
 
-#ifndef __OpcUaFileServer_Library_h__
-#define __OpcUaFileServer_Library_h__
+#ifndef __OpcUaFileServer_Application_h__
+#define __OpcUaFileServer_Application_h__
+
+#include <string>
 
 #include "OpcUaStackServer/Application/ApplicationIf.h"
 
-#include "OpcUaFileServer/Library/Application.h"
+#include "OpcUaFileServer/Util/FileServerConfig.h"
+#include "OpcUaFileServer/DataLayer/FileSystemAccess.h"
+#include "OpcUaFileServer/OpcUaLayer/FileDirectoryObject.h"
 
 namespace OpcUaFileServer
 {
 
-	class Library
-	: public OpcUaStackServer::ApplicationIf
+	class Application
 	{
 	  public:
-		Library(void);
-		virtual ~Library(void);
+		Application(void);
+		~Application(void);
 
-		//- ApplicationIf -----------------------------------------------------
-		bool startup(void) override;
-		bool shutdown(void) override;
-		std::string version(void) override;
-		std::string gitCommit(void) override;
-		std::string gitBranch(void) override;
-		//- ApplicationIf -----------------------------------------------------
+		bool startup(
+			const std::string& configFileName,
+			OpcUaStackServer::ApplicationIf* applicationIf
+		);
+		bool shutdown(void);
 
 	  private:
-		Application application_;
+		OpcUaStackServer::ApplicationIf* applicationIf_ = nullptr;
+		FileServerConfig fileServerConfig_;
+		FileSystemAccess::Vec fileSystemAccessVec_;
+		FileDirectoryObject::Vec fileDirectoryObjectVec_;
 	};
 
 }

@@ -23,16 +23,10 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "OpcUaFileServer/Util/FileMode.h"
+
 namespace OpcUaFileServer
 {
-
-	typedef enum
-	{
-		FileModeRead = 1,
-		FileModeWrite = 2,
-		FileModeEraseExisting = 4,
-		FileModeAppend = 8
-	} FileMode;
 
 	class FileSystemIf
 	{

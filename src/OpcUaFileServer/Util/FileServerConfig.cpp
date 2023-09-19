@@ -63,7 +63,7 @@ namespace OpcUaFileServer
 		}
 
 		// Get namespace name attribute from configuration
-		rc = config.getConfigParameter("NamesapceName", namespaceName_);
+		rc = config.getConfigParameter("NamespaceName", namespaceName_);
 		if (rc == false) {
 			Log(Error, "attribute not found in file system configuration")
 				.parameter("FileSystemName", fileSystemName_)
@@ -166,11 +166,11 @@ namespace OpcUaFileServer
 
 		// Find file system entries in configuration
 		std::vector<Config> configVec;
-		config.getChilds("OpcUaFileServer/Filesystem", configVec);
+		config.getChilds("OpcUaFileServer.Filesystem", configVec);
 		if (configVec.size() == 0) {
 			Log(Error, "file system configuration not found in configuration file")
 				.parameter("ConfigurationFile", fileName)
-				.parameter("Attribute", "OpcUaFileServer/Filesystem");
+				.parameter("Attribute", "OpcUaFileServer.Filesystem");
 			return false;
 		}
 
@@ -183,7 +183,7 @@ namespace OpcUaFileServer
 			if (rc == false) {
 				Log(Error, "parse file system entry error")
 					.parameter("ConfigurationFile", fileName)
-					.parameter("Attribute", "OpcUaFileServer/Filesystem");
+					.parameter("Attribute", "OpcUaFileServer.Filesystem");
 				return false;
 			}
 

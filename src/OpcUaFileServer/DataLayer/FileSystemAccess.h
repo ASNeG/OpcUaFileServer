@@ -19,6 +19,7 @@
 #define __OpcUaFileServer_FileSystemAccess_h__
 
 #include <map>
+#include <map>
 #include <string>
 #include <filesystem>
 #include <fstream>
@@ -46,6 +47,7 @@ namespace OpcUaFileServer
 	  public:
 		using SPtr = boost::shared_ptr<FileSystemAccess>;
 		using FileHandleMap = std::map<uint32_t, FileHandle::SPtr>;
+		using Vec = std::vector<SPtr>;
 
 		FileSystemAccess(void);
 		virtual ~FileSystemAccess(void);

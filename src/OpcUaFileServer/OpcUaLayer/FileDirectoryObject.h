@@ -18,6 +18,7 @@
 #ifndef __OpcUaFileServer_FileDirectoryObject_h__
 #define __OpcUaFileServer_FileDirectoryObject_h__
 
+#include <vector>
 #include <filesystem>
 
 #include "OpcUaStackServer/StandardObjectType/FileDirectoryType.h"
@@ -36,6 +37,7 @@ namespace OpcUaFileServer
 	  public:
 		using SPtr = boost::shared_ptr<FileDirectoryObject>;
 		using Map = std::map<OpcUaStackCore::OpcUaNodeId, SPtr>;
+		using Vec = std::vector<SPtr>;
 
 		FileDirectoryObject(const std::filesystem::path& path);
 		virtual ~FileDirectoryObject(void);

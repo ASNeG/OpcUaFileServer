@@ -19,6 +19,7 @@
 #define __OpcUaFileServer_FileMode_h__
 
 #include <bitset>
+#include <iostream>
 
 namespace OpcUaFileServer
 {
@@ -39,6 +40,12 @@ namespace OpcUaFileServer
 		bool setMode(uint32_t mode);
 		bool setMode(const std::string& modeStr);
 		bool isMode(uint32_t mode);
+		void out(std::ostream& os) const;
+
+		friend std::ostream& operator<<(std::ostream& os, const FileMode& fileMode) {
+			fileMode.out(os);
+			return os;
+		}
 
 	  private:
 		std::bitset<4> mode_ = std::bitset<4>(std::string("0000"));
