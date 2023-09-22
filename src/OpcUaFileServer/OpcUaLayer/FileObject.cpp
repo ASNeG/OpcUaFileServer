@@ -245,10 +245,11 @@ namespace OpcUaFileServer
 
 		// Read data to file
 		std::string str = "";
-		rc = fileSystemIf_->readFile(fileHandle, length, str);
-		if (!rc) {
+		ResultCode resultCode = fileSystemIf_->readFile(fileHandle, length, str);
+		if (resultCode != ResultCode::OK) {
 			Log(Error, "read file instance error")
-				.parameter("Path", path_.string());
+				.parameter("Path", path_.string())
+				.parameter("ResultCode", ResultCodeMap::resultCode2String(resultCode));
 			applicationMethodContext->statusCode_ =  BadInternalError;
 			return;
 		}
@@ -310,10 +311,11 @@ namespace OpcUaFileServer
 
 		// Write data to file
 		std::string str = std::string((char*)data->memBuf(), data->size());
-		rc = fileSystemIf_->writeFile(fileHandle, str);
-		if (!rc) {
+	    ResultCode resultCode = fileSystemIf_->writeFile(fileHandle, str);
+		if (resultCode != ResultCode::OK) {
 			Log(Error, "write file instance error")
-				.parameter("Path", path_.string());
+				.parameter("Path", path_.string())
+				.parameter("ResultCode", ResultCodeMap::resultCode2String(resultCode));
 			applicationMethodContext->statusCode_ =  BadInternalError;
 			return;
 		}
@@ -325,11 +327,14 @@ namespace OpcUaFileServer
     bool
 	FileObject::create(void)
     {
+    	ResultCode resultCode = ResultCode::OK;
+
 		// create new file instance
-		bool rc = fileSystemIf_->createFile(path_.parent_path().string(), path_.filename().string());
-		if (!rc) {
+		resultCode = fileSystemIf_->createFile(path_.parent_path().string(), path_.filename().string());
+		if (resultCode != ResultCode::OK) {
 			Log(Error, "create file instance error")
-				.parameter("Path", path_.string());
+				.parameter("Path", path_.string())
+				.parameter("ResultCode", ResultCodeMap::resultCode2String(resultCode));
 			return false;
 		}
     	return true;
@@ -338,13 +343,15 @@ namespace OpcUaFileServer
     bool
 	FileObject::open(uint32_t& handle,  FileSystemIf::FileMode fileMode)
     {
+
     	uint32_t fileHandle;
 
     	// open file instance
-    	bool rc  = fileSystemIf_->openFile(path_.parent_path().string(), path_.filename().string(), fileMode, fileHandle);
-		if (!rc) {
+    	ResultCode resultCode  = fileSystemIf_->openFile(path_.parent_path().string(), path_.filename().string(), fileMode, fileHandle);
+		if (resultCode != ResultCode::OK) {
 			Log(Error, "open file instance error")
-				.parameter("Path", path_.string());
+				.parameter("Path", path_.string())
+				.parameter("ResultCode", ResultCodeMap::resultCode2String(resultCode));
 			return false;
 		}
 
@@ -367,11 +374,12 @@ namespace OpcUaFileServer
     	}
 
     	// close file instance
-    	bool rc = fileSystemIf_->closeFile(fileHandle);
-		if (!rc) {
+    	ResultCode resultCode = fileSystemIf_->closeFile(fileHandle);
+		if (resultCode != ResultCode::OK) {
 			Log(Error, "close file instance error")
 				.parameter("Path", path_.string())
-				.parameter("FileHandle", fileHandle);
+				.parameter("FileHandle", fileHandle)
+				.parameter("ResultCode", ResultCodeMap::resultCode2String(resultCode));
 			return 0;
 		}
 

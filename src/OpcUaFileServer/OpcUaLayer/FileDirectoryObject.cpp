@@ -136,6 +136,7 @@ namespace OpcUaFileServer
     void
 	FileDirectoryObject::call_CreateDirectory_Method(OpcUaStackCore::ApplicationMethodContext* applicationMethodContext)
     {
+    	ResultCode resultCode = ResultCode::OK;
     	bool rc = true;
 
     	OpcUaVariant::SPtr variantInput;
@@ -157,11 +158,12 @@ namespace OpcUaFileServer
 		std::string directoryName = variantInput->getSPtr<OpcUaString>()->toStdString();
 
 		// create new directory instance
-		rc = fileSystemIf_->createDirectory(path_.string(), directoryName);
-		if (!rc) {
+		resultCode = fileSystemIf_->createDirectory(path_.string(), directoryName);
+		if (resultCode != ResultCode::OK) {
 			Log(Error, "create directory instance error")
 				.parameter("Path", path_.string())
-				.parameter("DirectoryName", directoryName);
+				.parameter("DirectoryName", directoryName)
+				.parameter("ResultCode", ResultCodeMap::resultCode2String(resultCode));
 			applicationMethodContext->statusCode_ = BadInternalError;
 			return;
 		}
@@ -389,10 +391,11 @@ namespace OpcUaFileServer
 		fileDirectoryMap_.erase(fileDirectoryObject->nodeId());
 
 		// Delete directory from filesystem
-		bool rc = fileSystemIf_->remove(fileDirectoryObject->path().string());
-		if (!rc) {
+		ResultCode resultCode = fileSystemIf_->remove(fileDirectoryObject->path().string());
+		if (resultCode != ResultCode::OK) {
 			Log(Error, "delete directory from filesystem error")
-				.parameter("Path", fileDirectoryObject->path().string());
+				.parameter("Path", fileDirectoryObject->path().string())
+				.parameter("ResultCode", ResultCodeMap::resultCode2String(resultCode));
 			return false;
 		}
 
@@ -446,10 +449,11 @@ namespace OpcUaFileServer
 		fileMap_.erase(fileObject->nodeId());
 
 		// Delete file from filesystem
-		bool rc = fileSystemIf_->remove(fileObject->path().string());
-		if (!rc) {
+		ResultCode resultCode = fileSystemIf_->remove(fileObject->path().string());
+		if (resultCode != ResultCode::OK) {
 			Log(Error, "delete file from filesystem error")
-				.parameter("Path", fileObject->path().string());
+				.parameter("Path", fileObject->path().string())
+				.parameter("ResultCode", ResultCodeMap::resultCode2String(resultCode));
 			return false;
 		}
 

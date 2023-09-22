@@ -132,7 +132,7 @@ namespace OpcUaFileServer
 		}
 	}
 
-	bool
+	ResultCode
 	FileSystemAccess::createDirectory(
 		const std::string& path,
 		const std::string& directory
@@ -158,7 +158,7 @@ namespace OpcUaFileServer
 			Log(Error, "cannot create directory, because base path not exist")
 				.parameter("Path", absPath)
 				.parameter("Directory", directory);
-			return false;
+			return ResultCode::BasePathNotExist;
 		}
 
 		// check if path is a directory
@@ -175,7 +175,7 @@ namespace OpcUaFileServer
 			Log(Error, "cannot create directory, because base path is not a directory")
 				.parameter("Path", absPath)
 				.parameter("Directory", directory);
-			return false;
+			return ResultCode::CreatePathError;
 		}
 
 		std::filesystem::path newDirectory(absPath);
@@ -194,7 +194,7 @@ namespace OpcUaFileServer
 		if (rc) {
 			Log(Error, "cannot create directory, because target directory already exist")
 				.parameter("NewDirectory", newDirectory);
-			return false;
+			return ResultCode::PathExist;
 		}
 
 		// Create new directory
@@ -211,13 +211,13 @@ namespace OpcUaFileServer
 			Log(Error, "cannot create directory")
 				.parameter("Path", absPath)
 				.parameter("Directory", directory);
-			return false;
+			return ResultCode::CreateDirectoryError;
 		}
 
-		return true;
+		return ResultCode::OK;
 	}
 
-	bool
+	ResultCode
 	FileSystemAccess::createFile(
 		const std::string& path,
 		const std::string& file
@@ -243,7 +243,7 @@ namespace OpcUaFileServer
 			Log(Error, "cannot create file, because base path not exist")
 				.parameter("Path", absPath)
 				.parameter("File", file);
-			return false;
+			return ResultCode::BasePathNotExist;
 		}
 
 		// Check if path is a directory
@@ -260,7 +260,7 @@ namespace OpcUaFileServer
 			Log(Error, "cannot create file, because base path is not a directory")
 				.parameter("Path", absPath)
 				.parameter("File", file);
-			return false;
+			return ResultCode::InvalidPathError;
 		}
 
 		std::filesystem::path newFile(absPath);
@@ -279,7 +279,7 @@ namespace OpcUaFileServer
 		if (rc) {
 			Log(Error, "cannot create file, because target file already exist")
 				.parameter("NewFile", newFile);
-			return false;
+			return ResultCode::FileExist;
 		}
 		rc = true;
 
@@ -293,19 +293,19 @@ namespace OpcUaFileServer
 			if (!fs.is_open()) {
 				Log(Error, "create file failed")
 					.parameter("NewFile", newFile);
-				return false;
+				return ResultCode::CreateFileError;
 			}
 			fs.close();
 		} catch (const std::exception& e) {
 			Log(Error, "fstream operation error")
 				.parameter("What", e.what());
-			rc  = false;
+			return ResultCode::CreateFileError;
 		}
 
-		return rc;
+		return ResultCode::OK;
 	}
 
-	bool
+	ResultCode
 	FileSystemAccess::remove(
 		const std::string& path
 	)
@@ -316,7 +316,7 @@ namespace OpcUaFileServer
 		std::filesystem::path absPath(basePath_);
 		absPath.append(path);
 
-		// Check ic path exist
+		// Check if path exist
 		try {
 			rc = std::filesystem::exists(std::filesystem::path(absPath));
 		} catch(std::filesystem::filesystem_error const& ex) {
@@ -329,7 +329,7 @@ namespace OpcUaFileServer
 		if (!rc) {
 			Log(Error, "cannot delete directory/file, because path not exist")
 				.parameter("Path", absPath);
-			return false;
+			return ResultCode::BasePathNotExist;
 		}
 
 		// Check if path is a directory or a regular file
@@ -346,7 +346,7 @@ namespace OpcUaFileServer
 		if (rc) {
 			Log(Error, "cannot delete directory/file, because path is not a directory or regular file")
 				.parameter("Path", absPath);
-			return false;
+			return ResultCode::InvalidPathError;
 		}
 
 		// Delete directory/file
@@ -362,13 +362,13 @@ namespace OpcUaFileServer
 		if (!rc) {
 			Log(Error, "cannot remove directory/file")
 				.parameter("Path", absPath);
-			return false;
+			return ResultCode::FileRemoveError;
 		}
 
-		return true;
+		return ResultCode::OK;
 	}
 
-	bool
+	ResultCode
 	FileSystemAccess::openFile(
 		const std::string& path,
 		const std::string& file,
@@ -396,7 +396,7 @@ namespace OpcUaFileServer
 			Log(Error, "cannot open file, because base path not exist")
 				.parameter("Path", absPath)
 				.parameter("File", file);
-			return false;
+			return ResultCode::BasePathNotExist;
 		}
 
 		// Check if path is a directory
@@ -413,7 +413,7 @@ namespace OpcUaFileServer
 			Log(Error, "cannot open file, because base path is not a directory")
 				.parameter("Path", absPath)
 				.parameter("File", file);
-			return false;
+			return ResultCode::InvalidPathError;
 		}
 
 		std::filesystem::path newFile(absPath);
@@ -432,7 +432,7 @@ namespace OpcUaFileServer
 		if (!rc) {
 			Log(Error, "cannot open file, because target file not exist")
 				.parameter("NewFile", newFile);
-			return false;
+			return ResultCode::FileNotExist;
 		}
 
 		// Check if file is a regular file
@@ -448,7 +448,7 @@ namespace OpcUaFileServer
 		if (!rc) {
 			Log(Error, "cannot open file, because target file is not a regular file")
 				.parameter("NewFile", newFile);
-			return false;
+			return ResultCode::FileAccessError;
 		}
 
 		// Open file
@@ -461,7 +461,7 @@ namespace OpcUaFileServer
 			if (!fh->fs_.is_open()) {
 				Log(Error, "open file failed")
 					.parameter("NewFile", newFile);
-				return false;
+				return ResultCode::FileAccessError;
 			}
 		} catch (const std::exception& e) {
 			Log(Error, "fstream operation error")
@@ -471,17 +471,17 @@ namespace OpcUaFileServer
 		if (!rc) {
 			Log(Error, "open file failed")
 				.parameter("NewFile", newFile);
-			return false;
+			return ResultCode::FileOpenError;
 		}
 
 		fileHandle = fileHandle_;
 		fileHandle_++;
 		fileHandleMap_.insert(std::make_pair(fileHandle, fh));
 
-		return true;
+		return ResultCode::OK;
 	}
 
-	bool
+	ResultCode
 	FileSystemAccess::closeFile(
 		uint32_t& fileHandle
 	)
@@ -491,7 +491,7 @@ namespace OpcUaFileServer
 		if (it == fileHandleMap_.end()) {
 			Log(Error, "close file failed, because file handle unknown")
 				.parameter("FileHandle", fileHandle);
-			return false;
+			return ResultCode::FileNotOpen;
 		}
 
 		// Close file
@@ -500,16 +500,16 @@ namespace OpcUaFileServer
 		} catch (const std::exception& e) {
 			Log(Error, "fstream operation error")
 				.parameter("What", e.what());
-			return false;
+			return ResultCode::FileCloseError;
 		}
 
 		// Remove file handle from file handle map
 		fileHandleMap_.erase(fileHandle);
 
-		return true;
+		return ResultCode::OK;
 	}
 
-	bool
+	ResultCode
 	FileSystemAccess::writeFile(
 		uint32_t fileHandle,
 		const std::string& data
@@ -527,7 +527,7 @@ namespace OpcUaFileServer
 		if (!fh->fs_.is_open()) {
 			Log(Error, "file write failed, because file not open")
 				.parameter("FileHandle", fileHandle);
-			return false;
+			return ResultCode::FileNotOpen;
 		}
 
 		// Write data to file
@@ -537,13 +537,13 @@ namespace OpcUaFileServer
 			Log(Error, "fstream write data error")
 				.parameter("What", e.what())
 				.parameter("FileHandle", fileHandle);
-			return false;
+			return ResultCode::FileWriteError;
 		}
 
-		return true;
+		return ResultCode::OK;
 	}
 
-	bool
+	ResultCode
 	FileSystemAccess::readFile(
 		uint32_t fileHandle,
 		int32_t length,
@@ -572,10 +572,10 @@ namespace OpcUaFileServer
 			Log(Error, "fstream read data error")
 				.parameter("What", e.what())
 				.parameter("FileHandle", fileHandle);
-			return false;
+			return ResultCode::FileReadError;
 		}
 
-		return true;
+		return ResultCode::OK;
 	}
 
 	bool

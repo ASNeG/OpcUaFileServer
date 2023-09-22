@@ -60,37 +60,37 @@ namespace OpcUaFileServer
 			std::vector<std::string>& directories
 		) override;
 
-		virtual bool createDirectory(
+		virtual ResultCode createDirectory(
 			const std::string& path,
 			const std::string& directory
 		) override;
 
-		virtual bool createFile(
+		virtual ResultCode createFile(
 			const std::string& path,
 			const std::string& file
 		) override;
 
-		virtual bool remove(
+		virtual ResultCode remove(
 			const std::string& path
 		) override;
 
-		virtual bool openFile(
+		virtual ResultCode openFile(
 			const std::string& path,
 			const std::string& file,
 			FileMode fileMode,
 			uint32_t& fileHandle
 		) override;
 
-		virtual bool closeFile(
+		virtual ResultCode closeFile(
 			uint32_t& fileHandle
 		) override;
 
-		virtual bool writeFile(
+		virtual ResultCode writeFile(
 			uint32_t fileHandle,
 			const std::string& data
 		) override;
 
-		virtual bool readFile(
+		virtual ResultCode readFile(
 			uint32_t fileHandle,
 			int32_t length,
 			std::string& data
