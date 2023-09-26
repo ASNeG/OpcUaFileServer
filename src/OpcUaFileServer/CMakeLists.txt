@@ -81,6 +81,10 @@ endif()
 file (GLOB CONFIG_FILES ${PROJECT_SOURCE_DIR}/OpcUaFileServer/Config/*.xml)
 install(TARGETS OpcUaFileServer DESTINATION ${INSTALL_PREFIX}/lib)
 
+install(DIRECTORY DESTINATION ${INSTALL_PREFIX}/../var/OpcUaFileServer)
+install(DIRECTORY DESTINATION ${INSTALL_PREFIX}/../var/OpcUaFileServer/FileSystem1)
+install(DIRECTORY DESTINATION ${INSTALL_PREFIX}/../var/OpcUaFileServer/FileSystem2)
+
 if (WIN32)
     install(FILES ${CONFIG_FILES} DESTINATION ${INSTALL_PREFIX}/../etc/OpcUaStack/OpcUaFileServer) 
     install(FILES ${PROJECT_SOURCE_DIR}/OpcUaFileServer/linux/log/README DESTINATION ${INSTALL_PREFIX}/../var/log/OpcUaStack/OpcUaFileServer)

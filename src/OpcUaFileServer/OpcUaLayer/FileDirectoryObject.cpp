@@ -242,7 +242,7 @@ namespace OpcUaFileServer
 		// open file instance
 		uint32_t fileHandle = 0;
 		if (requestFileOpen) {
-			rc = fileObject->open(fileHandle, 0); // FIXME: We must use a file mode from configuration file
+			rc = fileObject->open(fileHandle, {});
 			if (!rc) {
 				Log(Error, "open file instance error")
 					.parameter("Path", path_.string())

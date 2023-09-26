@@ -38,14 +38,16 @@ namespace OpcUaFileServer
 	}
 
 	bool
-	FileSystemAccess::init(const std::filesystem::path& basePath)
+	FileSystemAccess::init(
+		FileSystemConfig::SPtr fileSystemConfig
+	)
 	{
 		bool rc = true;
-		basePath_ = basePath;
+		fileSystemConfig_ = fileSystemConfig;
 
 		// check if base path exist
 		try {
-			rc  = std::filesystem::exists(basePath);
+			rc  = std::filesystem::exists(fileSystemConfig_->fileSystemDirectory());
 		} catch(std::filesystem::filesystem_error const& ex) {
 			Log(Error, "filesystem exists call error")
 				.parameter("What", ex.what())
@@ -55,13 +57,13 @@ namespace OpcUaFileServer
 		}
 		if (!rc) {
 			Log(Error, "base file system path do not exist")
-				.parameter("BasePath", basePath);
+				.parameter("BasePath", fileSystemConfig_->fileSystemDirectory());
 			return false;
 		}
 
 		// Check if base path is a directory
 		try {
-			rc = std::filesystem::is_directory(basePath);
+			rc = std::filesystem::is_directory(fileSystemConfig_->fileSystemDirectory());
 		} catch(std::filesystem::filesystem_error const& ex) {
 			Log(Error, "filesystem is_directory call error")
 				.parameter("What", ex.what())
@@ -71,7 +73,7 @@ namespace OpcUaFileServer
 		}
 		if (!rc) {
 			Log(Error, "base file system path do not exist")
-				.parameter("BasePath", basePath);
+				.parameter("BasePath", fileSystemConfig_->fileSystemDirectory());
 			return false;
 		}
 
@@ -86,7 +88,7 @@ namespace OpcUaFileServer
 	)
 	{
 		bool rc = true;
-		std::filesystem::path absPath = basePath_;
+		std::filesystem::path absPath = fileSystemConfig_->fileSystemDirectory();
 		absPath.append(path);
 
 		// Check if path exist
@@ -141,7 +143,7 @@ namespace OpcUaFileServer
 		bool rc = true;
 
 		// Create access path
-		std::filesystem::path absPath(basePath_);
+		std::filesystem::path absPath = fileSystemConfig_->fileSystemDirectory();
 		absPath.append(path);
 
 		// Check if path exist
@@ -226,7 +228,7 @@ namespace OpcUaFileServer
 		bool rc = true;
 
 		// Create access path
-		std::filesystem::path absPath(basePath_);
+		std::filesystem::path absPath = fileSystemConfig_->fileSystemDirectory();
 		absPath.append(path);
 
 		// Check if path exist
@@ -283,13 +285,16 @@ namespace OpcUaFileServer
 		}
 		rc = true;
 
+		// Set  configuration file mode
+		std::ios_base::openmode openMode;
+		if (fileSystemConfig_->fileMode().isMode(FileMode::Read)) openMode |= std::ios_base::in;
+		if (fileSystemConfig_->fileMode().isMode(FileMode::Write)) openMode |= std::ios_base::out;
+		if (fileSystemConfig_->fileMode().isMode(FileMode::Append)) openMode |= std::ios_base::app;
+
 		// Create new file
 		std::fstream fs;
 		try {
-
-			// FIXME: We must configure file modes in configuration file!!
-
-			fs.open(newFile.string(), std::ios_base::out | std::ios_base::in | std::ios_base::app);
+			fs.open(newFile.string(), openMode);
 			if (!fs.is_open()) {
 				Log(Error, "create file failed")
 					.parameter("NewFile", newFile);
@@ -313,7 +318,7 @@ namespace OpcUaFileServer
 		bool rc = true;
 
 		// Create access path
-		std::filesystem::path absPath(basePath_);
+		std::filesystem::path absPath = fileSystemConfig_->fileSystemDirectory();
 		absPath.append(path);
 
 		// Check if path exist
@@ -372,14 +377,19 @@ namespace OpcUaFileServer
 	FileSystemAccess::openFile(
 		const std::string& path,
 		const std::string& file,
-		FileMode fileMode,
+		std::optional<FileMode> fileMode,
 		uint32_t& fileHandle
 	)
 	{
 		bool rc = true;
 
+		// Use configured file mode if necassary
+		if (!fileMode) {
+			fileMode = fileSystemConfig_->fileMode();
+		}
+
 		// Create access path
-		std::filesystem::path absPath(basePath_);
+		std::filesystem::path absPath = fileSystemConfig_->fileSystemDirectory();
 		absPath.append(path);
 
 		// Check if path exist
@@ -451,13 +461,17 @@ namespace OpcUaFileServer
 			return ResultCode::FileAccessError;
 		}
 
+		// Set  configuration file mode
+		std::ios_base::openmode openMode;
+		if (fileSystemConfig_->fileMode().isMode(FileMode::Read)) openMode |= std::ios_base::in;
+		if (fileSystemConfig_->fileMode().isMode(FileMode::Write)) openMode |= std::ios_base::out;
+		if (fileSystemConfig_->fileMode().isMode(FileMode::Append)) openMode |= std::ios_base::app;
+		if (fileSystemConfig_->fileMode().isMode(FileMode::Write) && fileSystemConfig_->fileMode().isMode(FileMode::EraseExisting)) openMode |= std::ios_base::trunc;
+
 		// Open file
 		auto fh = boost::make_shared<FileHandle>();
 		try {
-
-			// FIXME: use file modes!!!!
-
-			fh->fs_.open(newFile.string(), std::ios_base::out | std::ios_base::in /*| std::ios_base::app*/);
+			fh->fs_.open(newFile.string(), openMode);
 			if (!fh->fs_.is_open()) {
 				Log(Error, "open file failed")
 					.parameter("NewFile", newFile);

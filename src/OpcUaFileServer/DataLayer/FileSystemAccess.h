@@ -26,6 +26,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "OpcUaFileServer/Util/FileServerConfig.h"
 #include "OpcUaFileServer/DataLayer/FileSystemIf.h"
 
 namespace OpcUaFileServer
@@ -37,7 +38,7 @@ namespace OpcUaFileServer
 		using SPtr = boost::shared_ptr<FileHandle>;
 
 		std::fstream fs_;
-		time_t openTime_;
+		time_t accessTime_ = 0;
 	};
 
 	class FileSystemAccess
@@ -52,7 +53,9 @@ namespace OpcUaFileServer
 		FileSystemAccess(void);
 		virtual ~FileSystemAccess(void);
 
-		bool init(const std::filesystem::path& basePath);
+		bool init(
+			FileSystemConfig::SPtr fileSystemConfig
+		);
 
 		virtual void getChilds(
 			const std::string& path,
@@ -77,7 +80,7 @@ namespace OpcUaFileServer
 		virtual ResultCode openFile(
 			const std::string& path,
 			const std::string& file,
-			FileMode fileMode,
+			std::optional<FileMode> fileMode,
 			uint32_t& fileHandle
 		) override;
 
@@ -107,8 +110,8 @@ namespace OpcUaFileServer
 		) override;
 
 	  private:
+		FileSystemConfig::SPtr fileSystemConfig_ = nullptr;
 		uint32_t fileHandle_ = 1;
-		std::filesystem::path basePath_ = {};
 		FileHandleMap fileHandleMap_;
 	};
 

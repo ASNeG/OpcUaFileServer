@@ -43,6 +43,7 @@ namespace OpcUaFileServer
 		std::string namespaceName(void);
 		bool rwLock(void);
 		FileMode& fileMode(void);
+		uint32_t idleTimeout(void);
 
 	  private:
 		std::string fileSystemName_ = "";
@@ -50,6 +51,7 @@ namespace OpcUaFileServer
 		std::string namespaceName_ = "";
 		bool rwLock_ = false;
 		FileMode fileMode_;
+		uint32_t idleTimeout_ = 10000;
 	};
 
 

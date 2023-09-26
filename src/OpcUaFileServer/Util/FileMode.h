@@ -27,10 +27,10 @@ namespace OpcUaFileServer
 	class FileMode
 	{
 	  public:
-		const uint32_t Read = 1;
-		const uint32_t Write = 2;
-		const uint32_t EraseExisting = 4;
-		const uint32_t Append = 8;
+		static const uint32_t Read = 1;
+		static const uint32_t Write = 2;
+		static const uint32_t EraseExisting = 4;
+		static const uint32_t Append = 8;
 
 		FileMode(void);
 		FileMode(const FileMode& fileMode);
@@ -40,6 +40,7 @@ namespace OpcUaFileServer
 		bool setMode(uint32_t mode);
 		bool setMode(const std::string& modeStr);
 		bool isMode(uint32_t mode);
+		bool isMode(void);
 		void out(std::ostream& os) const;
 
 		friend std::ostream& operator<<(std::ostream& os, const FileMode& fileMode) {

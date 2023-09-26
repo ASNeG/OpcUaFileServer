@@ -67,7 +67,7 @@ namespace OpcUaFileServer
 
 			// Create file system object
 			auto fileSystemAccess = boost::make_shared<FileSystemAccess>();
-			rc = fileSystemAccess->init((std::filesystem::path(fileSystemConfig->fileSystemDirectory())));
+			rc = fileSystemAccess->init(fileSystemConfig);
 			if (rc == false) {
 				Log(Error, "create file system object error")
 					.parameter("FileSystemName", fileSystemConfig->fileSystemName())

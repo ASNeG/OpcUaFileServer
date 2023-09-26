@@ -67,11 +67,21 @@ namespace OpcUaFileServer
 	bool
 	FileMode::isMode(uint32_t mode)
 	{
-		if ((mode & Read) == Read) return mode_[0] == 1;
-		if ((mode & Write) == Write) return mode_[1] == 1;
-		if ((mode & EraseExisting) == EraseExisting) return mode_[2] == 1;
-		if ((mode & Append) == Append) return mode_[3] == 1;
+		if (mode == Read) return mode_[0] == 1;
+		if (mode == Write) return mode_[1] == 1;
+		if (mode == EraseExisting) return mode_[2] == 1;
+		if (mode == Append) return mode_[3] == 1;
 		return false;
+	}
+
+	bool
+	FileMode::isMode(void)
+	{
+		for (uint32_t idx = 0; idx < mode_.size(); idx++) {
+			if (mode_[idx] == 1) return false;
+		}
+		return true;
+
 	}
 
 	void

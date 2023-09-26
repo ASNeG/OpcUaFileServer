@@ -99,6 +99,15 @@ namespace OpcUaFileServer
 		}
 		rwLock_ = rwLock > 0;
 
+		// Get idle timeout
+		rc = config.getConfigParameter("IdleTimeout", idleTimeout_);
+		if (rc == false) {
+			Log(Error, "attribute not found in file system configuration")
+				.parameter("FileSystemName", fileSystemName_)
+				.parameter("Attribute", "IdleTimeout");
+			return false;
+		}
+
 		return rc;
 	}
 
@@ -130,6 +139,12 @@ namespace OpcUaFileServer
 	FileSystemConfig::fileMode(void)
 	{
 		return fileMode_;
+	}
+
+	uint32_t
+	FileSystemConfig::idleTimeout(void)
+	{
+		return idleTimeout_;
 	}
 
 

@@ -21,4 +21,5 @@ build_local
 .project
 .settings
 build_local_Debug
+*.pyc
 

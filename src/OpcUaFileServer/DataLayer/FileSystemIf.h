@@ -18,6 +18,7 @@
 #ifndef __OpcUaFileServer_FileSystemIf_h__
 #define __OpcUaFileServer_FileSystemIf_h__
 
+#include <optional>
 #include <vector>
 #include <bitset>
 
@@ -33,7 +34,6 @@ namespace OpcUaFileServer
 	{
 	  public:
 		using SPtr = boost::shared_ptr<FileSystemIf>;
-		using FileMode = std::bitset<4>;
 
 		FileSystemIf(void);
 		virtual ~FileSystemIf(void);
@@ -61,7 +61,7 @@ namespace OpcUaFileServer
 		virtual ResultCode openFile(
 			const std::string& path,
 			const std::string& file,
-			FileMode fileMode,
+			std::optional<FileMode> fileMode,
 			uint32_t& fileHandle
 		) = 0;
 

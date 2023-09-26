@@ -25,18 +25,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <OpcUaFileServer Name="FileServer" xmlns="http://ASNeG/OpcUaFileServer.xsd">
 
-  <Filesystem FileSystemName="FileSystemRoot1">
-    <FileSystemDirectory>@CONF_DIR@</FileSystemDirectory>
+  <Filesystem FileSystemName="FileSystem1">
+    <FileSystemDirectory>@CONF_DIR@/../../../var/OpcUaFileServer/FileSystem1</FileSystemDirectory>
     <NamespaceName>http://ASNeG.com/OpcUaFileServer</NamespaceName>
-    <CreateFileMode>0</CreateFileMode>
+    <CreateFileMode>3</CreateFileMode>
     <RWLock>1</RWLock>
+    <IdleTimeout>60</IdleTimeout>
   </Filesystem>
   
-  <Filesystem FileSystemName="FileSystemRoot2">
-    <FileSystemDirectory>@CONF_DIR@</FileSystemDirectory>
+  <Filesystem FileSystemName="FileSystem2">
+    <FileSystemDirectory>@CONF_DIR@/../../../var/OpcUaFileServer/FileSystem2</FileSystemDirectory>
     <NamespaceName>http://ASNeG.com/OpcUaFileServer</NamespaceName>
-    <CreateFileMode>0</CreateFileMode>
+    <CreateFileMode>3</CreateFileMode>
     <RWLock>1</RWLock>
+    <IdleTimeout>60</IdleTimeout>
   </Filesystem>
 
 </OpcUaFileServer>
